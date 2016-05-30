@@ -7,15 +7,16 @@ Use dropbox in console
 $ git clone https://github.com/sidra-asa/dropbox_console.git
 $ cd dropbox_console
 $ git submodule init
-$ git submodle update
+$ git submodule update
 $ cd modules/dropbox-sdk-python
-$ python setup.py install 
-
+$ python setup.py install
+$ cd ../../
+$ pip install -r requirements.txt
 ```
 
 # How to use
 
-This tool access to Dropbox via Dropbox API v2, 
+This tool access to Dropbox via Dropbox API v2,
 you need the access token of your account.
 Please follow the instruction:
 [Get access token](https://blogs.dropbox.com/developers/2014/05/generate-an-access-token-for-your-own-account/)
