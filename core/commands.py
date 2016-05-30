@@ -20,7 +20,7 @@ class Commands(object):
             close=dict(obj=self.cmd_close,
                        description="Close the current session"),
             delete=dict(obj=self.cmd_delete,
-                        description="Delete file on remote"),
+                        description="Delete file on remote (not implement)"),
             get=dict(obj=self.cmd_get,
                      description="Download remote file to local"),
             help=dict(obj=self.cmd_help,
@@ -32,7 +32,7 @@ class Commands(object):
             ls=dict(obj=self.cmd_ls,
                     description="List files in current remote directory"),
             mkdir=dict(obj=self.cmd_mkdir,
-                       description="Make a new directory on remote"),
+                       description="Make a new directory on remote (not implement)"),
             put=dict(obj=self.cmd_put,
                      description="Upload local file to remote"),
             token=dict(obj=self.cmd_token,
@@ -192,23 +192,31 @@ class Commands(object):
             if result.id:
                 print_info("Upload file {} successfully.".format(filename))
 
-        """
-        result = __session__.dbx.files_list_folder(dirname)
-
-        index = 1
-        row = []
-        for f in result.entries:
-            if isinstance(f, dropbox.files.FolderMetadata):
-                filetype = 'Directory'
-            else:
-                filetype = 'File'
-
-            row.append([index, f.name, filetype])
-            index += 1
-
-        print table(['index', 'File name', 'File type'], row)
-        """
     def cmd_get(self, *args):
-        pass
+
+        def usage():
+            print("usage: get FILE")
+
+        opts, argv = getopt.getopt(args, '')
+        if (len(argv) >= 1):
+            filename = argv[0]
+        else:
+            usage()
+
+        if not re.search('/', filename):
+            filename = __session__.rdir+'/'+filename
+
+        try:
+            file_meta, result = __session__.dbx.files_download(filename)
+        except IOError:
+            print_warn("No such file!")
+
+        if result.ok:
+            local_name = filename.split('/').pop()
+            with open(__session__.ldir+'/'+local_name, 'wb') as f:
+                for block in result.iter_content(1024):
+                    f.write(block)
+            print_info("Download file {} successfully.".format(local_name))
+
     def cmd_delete(self, *args):
         pass
