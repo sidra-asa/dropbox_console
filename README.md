@@ -10,7 +10,8 @@ $ git submodule init
 $ git submodule update
 $ cd modules/dropbox-sdk-python
 $ python setup.py install
-
+$ cd ../../
+$ pip install -r requirements.txt
 ```
 
 # How to use
