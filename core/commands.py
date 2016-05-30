@@ -13,32 +13,32 @@ class Commands(object):
     def __init__(self):
         # Map commands to their related functions.
         self.commands = dict(
-            token=dict(obj=self.cmd_token,
-                       description="Set access token"),
-            userinfo=dict(obj=self.cmd_userinfo,
-                          description="Show information of user"),
+            cd=dict(obj=self.cmd_cd,
+                    description="Change remote directory"),
+            clear=dict(obj=self.cmd_clear,
+                       description="Clear the console"),
+            close=dict(obj=self.cmd_close,
+                       description="Close the current session"),
+            delete=dict(obj=self.cmd_delete,
+                        description="Delete file on remote"),
+            get=dict(obj=self.cmd_get,
+                     description="Download remote file to local"),
+            help=dict(obj=self.cmd_help,
+                      description="Show this help message"),
             lcd=dict(obj=self.cmd_lcd,
                      description="Change local directory"),
             lls=dict(obj=self.cmd_lls,
                      description="List local files in current directory"),
-            cd=dict(obj=self.cmd_cd,
-                    description="Change remote directory"),
             ls=dict(obj=self.cmd_ls,
                     description="List files in current remote directory"),
             mkdir=dict(obj=self.cmd_mkdir,
                        description="Make a new directory on remote"),
             put=dict(obj=self.cmd_put,
                      description="Upload local file to remote"),
-            get=dict(obj=self.cmd_get,
-                     description="Download remote file to local"),
-            delete=dict(obj=self.cmd_delete,
-                        description="Delete file on remote"),
-            clear=dict(obj=self.cmd_clear,
-                       description="Clear the console"),
-            help=dict(obj=self.cmd_help,
-                      description="Show this help message"),
-            close=dict(obj=self.cmd_close,
-                       description="Close the current session"),
+            token=dict(obj=self.cmd_token,
+                       description="Set access token"),
+            userinfo=dict(obj=self.cmd_userinfo,
+                          description="Show information of user"),
         )
 
     def cmd_clear(self, *args):
@@ -50,7 +50,7 @@ class Commands(object):
         print(bold("Commands:"))
 
         rows = []
-        for command_name, command_item in self.commands.items():
+        for command_name, command_item in sorted(self.commands.items()):
             rows.append([command_name, command_item['description']])
 
         print(table(['Command', 'Description'], rows))
