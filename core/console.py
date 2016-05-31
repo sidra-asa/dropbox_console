@@ -3,6 +3,8 @@ import glob
 import atexit
 import readline
 
+from ConfigParser import SafeConfigParser
+
 from core.colors import bold, cyan, white
 from core.session import __session__
 from core.commands import Commands
@@ -78,6 +80,15 @@ class Console(object):
 
         # Register the save history at program's exit.
         atexit.register(save_history, path=history_path)
+
+        # Start session, set token
+        config = SafeConfigParser()
+        config.read('conf/dropbox.conf')
+        try:
+            token = config.get("Credentials", "AccessToken")
+            __session__.set_token(token)
+        except:
+            print "Please set token"
 
         # Main loop.
         while self.active:

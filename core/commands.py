@@ -3,8 +3,10 @@ import re
 import getopt
 import dropbox
 
+from ConfigParser import SafeConfigParser
+
 from core.out import *
-from core.colors import bold, cyan, white
+from core.colors import bold
 from core.session import __session__
 
 
@@ -82,6 +84,14 @@ class Commands(object):
             token = token.strip('\'')
         elif re.search('\"', token):
             token = token.strip('\"')
+
+        config = SafeConfigParser()
+        config.read('conf/dropbox.conf')
+        config.remove_section('Credentials')
+        config.add_section('Credentials')
+        config.set('Credentials', 'AccessToken', token)
+        with open('conf/dropbox.conf', 'w') as f:
+            config.write(f)
 
         __session__.set_token(token)
         self.cmd_userinfo()
