@@ -165,7 +165,23 @@ class Commands(object):
         print table(['index', 'File name', 'File type'], row)
 
     def cmd_mkdir(self, *args):
-        pass
+        def usage():
+            print("usage: mkdir foldername")
+
+        opts, argv = getopt.getopt(args, '')
+        if (len(argv) >= 1):
+            foldername = argv[0]
+        else:
+            usage()
+
+        if not re.search('/', foldername):
+            foldername = '/' + foldername
+
+        try:
+            __session__.dbx.files_create_folder(foldername)
+            print_info("Create folder {} successfully.".format(foldername))
+        except:
+            print_warn("Folder Create FAILED!")
 
     def cmd_put(self, *args):
 
