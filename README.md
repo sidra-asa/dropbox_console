@@ -6,11 +6,6 @@ Use dropbox in console
 ```
 $ git clone https://github.com/sidra-asa/dropbox_console.git
 $ cd dropbox_console
-$ git submodule init
-$ git submodule update
-$ cd modules/dropbox-sdk-python
-$ python setup.py install
-$ cd ../../
 $ pip install -r requirements.txt
 ```
 
