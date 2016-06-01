@@ -94,7 +94,6 @@ class Commands(object):
             config.write(f)
 
         __session__.set_token(token)
-        self.cmd_userinfo()
 
     def cmd_userinfo(self, *args):
         if __session__.is_set():

@@ -36,5 +36,14 @@ class Session(object):
         self.token = token
         print_info("Token set as: {0}".format(token))
         self.dbx = dropbox.Dropbox(self.token)
+        info = self.dbx.users_get_current_account()
+        print(table(
+            ['Key', 'Value'],
+            [
+                ('Name', info.name.display_name),
+                ('E-mail', info.email)
+            ]
+        ))
+
 
 __session__ = Session()
