@@ -74,7 +74,7 @@ class Console(object):
 
         # If there is an history file, read from it and load the history
         # so that they can be loaded in the shell.
-        history_path = os.path.expanduser('~/.consolehistory')
+        history_path = os.path.expanduser('.consolehistory')
         if os.path.exists(history_path):
             readline.read_history_file(history_path)
 
