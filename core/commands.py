@@ -43,10 +43,10 @@ class Commands(object):
                           description="Show information of user"),
         )
 
-    def input_check(func):
+    def _input_check(func):
 
         def func_wrapper(calling_obj, *args, **kwargs):
-            # input_args = args[1:]
+            need_usage = ['cmd_token', 'cmd_mkdir', 'cmd_put', 'cmd_get']
             try:
                 opts, argv = getopt.getopt(args, '')
             except getopt.GetoptError as e:
@@ -63,18 +63,22 @@ class Commands(object):
                     elif re.search('\"', element):
                         element = element.strip('\"')
                     new_argv.append(element)
-                return func(calling_obj, opts, tuple(new_argv))
+                argv = tuple(new_argv)
+
             else:
-                print(func.__doc__)
-                return
+                if func.__name__ in need_usage:
+                    print(func.__doc__)
+                    return
+
+            return func(calling_obj, opts, argv)
 
         return func_wrapper
 
-    def cmd_clear(self, *args):
+    def cmd_clear(self):
 
         os.system('clear')
 
-    def cmd_help(self, *args):
+    def cmd_help(self):
 
         print(bold("Commands:"))
 
@@ -84,11 +88,12 @@ class Commands(object):
 
         print(table(['Command', 'Description'], rows))
 
-    def cmd_close(self, *args):
+    def cmd_close(self):
 
         __session__.clear()
+        sys.exit(0)
 
-    @input_check
+    @_input_check
     def cmd_token(self, opts, argv):
         """ Set access token
 
@@ -106,7 +111,7 @@ class Commands(object):
 
         __session__.set_token(token)
 
-    def cmd_userinfo(self, opts, argv):
+    def cmd_userinfo(self):
         if __session__.is_set():
             info = __session__.dbx.users_get_current_account()
             print(table(
@@ -117,10 +122,10 @@ class Commands(object):
                 ]
             ))
 
-    def cmd_lls(self, *args):
-        opts, argv = getopt.getopt(args, '')
+    @_input_check
+    def cmd_lls(self, opts, argv):
         if (len(argv) >= 1):
-            dirname = argv[0].strip()
+            dirname = argv[0]
         else:
             dirname = __session__.ldir
 
@@ -138,10 +143,10 @@ class Commands(object):
         except OSError:
             print "No such file or directory: {0}".format(dirname+"/"+filename)
 
-    def cmd_lcd(self, *args):
-        opts, argv = getopt.getopt(args, '')
+    @_input_check
+    def cmd_lcd(self, opts, argv):
         if (len(argv) >= 1):
-            dirname = argv[0].strip()
+            dirname = argv[0]
         else:
             dirname = os.getenv("HOME")
 
@@ -152,20 +157,20 @@ class Commands(object):
 
         print_info("Local Directory set as: {0}".format(__session__.ldir))
 
-    def cmd_cd(self, *args):
-        opts, argv = getopt.getopt(args, '')
+    @_input_check
+    def cmd_cd(self,  opts, argv):
         if (len(argv) >= 1):
-            dirname = argv[0].strip()
+            dirname = argv[0]
             __session__.rdir += "/"+dirname
         else:
             __session__.rdir = ''
 
         print_info("Remote Directory set as: {0}".format(__session__.rdir))
 
-    def cmd_ls(self, *args):
-        opts, argv = getopt.getopt(args, '')
+    @_input_check
+    def cmd_ls(self, opts, argv):
         if (len(argv) >= 1):
-            dirname = __session__.rdir+"/"+argv[0].strip()
+            dirname = __session__.rdir+"/"+argv[0]
         else:
             dirname = __session__.rdir
 
@@ -184,18 +189,17 @@ class Commands(object):
 
         print table(['index', 'File name', 'File type'], row)
 
-    def cmd_mkdir(self, *args):
-        def usage():
-            print("usage: mkdir foldername")
+    @_input_check
+    def cmd_mkdir(self, opts, argv):
+        """Create directory
 
-        opts, argv = getopt.getopt(args, '')
-        if (len(argv) >= 1):
-            foldername = argv[0]
-        else:
-            usage()
+        Example:
+            > mkdir foldername
+        """
 
+        foldername = argv[0]
         if not re.search('/', foldername):
-            foldername = '/' + foldername
+            foldername = __session__.rdir+'/'+foldername
 
         try:
             __session__.dbx.files_create_folder(foldername)
@@ -203,42 +207,41 @@ class Commands(object):
         except:
             print_warn("Folder Create FAILED!")
 
-    def cmd_put(self, *args):
+    @_input_check
+    def cmd_put(self, opts, argv):
+        """Upload file to Dropbox directory
 
-        def usage():
-            print("usage: put FILE")
+        Example:
+            > put FILE
+        """
 
-        opts, argv = getopt.getopt(args, '')
-        if (len(argv) >= 1):
-            filename = argv[0]
-        else:
-            usage()
-
+        filename = argv[0]
         if not re.search('/', filename):
-            filename = __session__.ldir+'/'+filename
+            local_file = __session__.ldir+'/'+filename
+            remote_file = __session__.rdir+'/'+filename
+        else:
+            remote_file = __session__.rdir+'/'+filename.split('/').pop()
 
         try:
-            file_data = open(filename, 'rb').read()
+            file_data = open(local_file, 'rb').read()
         except IOError:
             print_warn("No such file!")
 
         finally:
-            result = __session__.dbx.files_upload(file_data, '/test/README.md')
+            result = __session__.dbx.files_upload(file_data, remote_file)
 
             if result.id:
-                print_info("Upload file {} successfully.".format(filename))
+                print_info("Upload file {} successfully.".format(local_file))
 
-    def cmd_get(self, *args):
+    @_input_check
+    def cmd_get(self, opts, argv):
+        """Download file from Dropbox directory
 
-        def usage():
-            print("usage: get FILE")
+        Example:
+            > get FILE
+        """
 
-        opts, argv = getopt.getopt(args, '')
-        if (len(argv) >= 1):
-            filename = argv[0]
-        else:
-            usage()
-
+        filename = argv[0]
         if not re.search('/', filename):
             filename = __session__.rdir+'/'+filename
 
