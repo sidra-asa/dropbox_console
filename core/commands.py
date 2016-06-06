@@ -43,6 +43,33 @@ class Commands(object):
                           description="Show information of user"),
         )
 
+    def input_check(func):
+
+        def func_wrapper(calling_obj, *args, **kwargs):
+            # input_args = args[1:]
+            try:
+                opts, argv = getopt.getopt(args, '')
+            except getopt.GetoptError as e:
+                print(e)
+                print(func.__doc__)
+                return
+
+            if len(argv) >= 1:
+                new_argv = []
+                for element in argv:
+                    element = element.strip()
+                    if re.search('\'', element):
+                        element = element.strip('\'')
+                    elif re.search('\"', element):
+                        element = element.strip('\"')
+                    new_argv.append(element)
+                return func(calling_obj, opts, tuple(new_argv))
+            else:
+                print(func.__doc__)
+                return
+
+        return func_wrapper
+
     def cmd_clear(self, *args):
 
         os.system('clear')
@@ -61,30 +88,14 @@ class Commands(object):
 
         __session__.clear()
 
-    def cmd_token(self, *args):
+    @input_check
+    def cmd_token(self, opts, argv):
+        """ Set access token
 
-        def usage():
-            print("usage: token TOKEN")
-
-        try:
-            opts, argv = getopt.getopt(args, '')
-        except getopt.GetoptError as e:
-            print(e)
-            usage()
-            return
-
-        if len(argv) == 0:
-            usage()
-            return
-        else:
-            token = argv[0]
-
-        # Filter of quotes
-        if re.search('\'', token):
-            token = token.strip('\'')
-        elif re.search('\"', token):
-            token = token.strip('\"')
-
+        Example:
+            > token TOKEN
+        """
+        token = argv[0]
         config = SafeConfigParser()
         config.read('conf/dropbox.conf')
         config.remove_section('Credentials')
@@ -95,7 +106,7 @@ class Commands(object):
 
         __session__.set_token(token)
 
-    def cmd_userinfo(self, *args):
+    def cmd_userinfo(self, opts, argv):
         if __session__.is_set():
             info = __session__.dbx.users_get_current_account()
             print(table(
